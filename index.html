@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Role Explore Experience</title>
+<style>
+  :root {
+    --red: #C0392B; --red-light: #fdf0ef; --red-mid: #e8534a;
+    --teal: #0e8c8c; --teal-light: #e6f7f7; --teal-mid: #1ab3b3;
+    --gold: #c9902a; --sand: #f5f0e8; --dark: #1a1a1a; --gray: #f4f4f4;
+    --grad: linear-gradient(135deg, #C0392B 0%, #8b3a8b 45%, #0e8c8c 100%);
+    --grad-soft: linear-gradient(135deg, #fdf0ef 0%, #f5eef8 50%, #e6f7f7 100%);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(160deg,#1a0a0a 0%,#0e2a2a 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:18px 8px 30px;}
+  #topbar{width:100%;max-width:820px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  #proj-name{font-weight:900;font-size:15px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  #slide-counter{font-size:12px;color:#aaa;}
+  #card{width:100%;max-width:820px;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.4);overflow:hidden;}
+  #slide-header{background:var(--grad);padding:18px 24px 16px;}
+  #slide-tag{background:rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:2px 10px;font-size:10px;font-weight:800;letter-spacing:1px;display:inline-block;margin-bottom:6px;}
+  #slide-title{color:#fff;font-weight:900;font-size:20px;}
+  #slide-body{padding:20px 24px;min-height:360px;background:#fafafa;}
+  #nav{display:flex;gap:12px;margin-top:18px;align-items:center;}
+  .nav-btn{border:none;border-radius:8px;padding:10px 24px;font-weight:700;font-size:14px;cursor:pointer;color:#fff;transition:.2s;}
+  .nav-btn:disabled{background:#444!important;opacity:.5;cursor:not-allowed;}
+  #prev-btn{background:var(--red);}
+  #next-btn{background:var(--teal);}
+  #dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:340px;}
+  .dot{height:8px;border-radius:4px;background:rgba(255,255,255,.3);cursor:pointer;transition:all .25s;}
+  #index{display:flex;gap:5px;margin-top:12px;flex-wrap:wrap;justify-content:center;max-width:820px;}
+  .idx-btn{background:rgba(255,255,255,.08);color:#bbb;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;}
+  .idx-btn.active{color:#fff;font-weight:700;}
+
+  /* --- Componentes reutilizáveis --- */
+  .section-label{display:inline-block;border-radius:4px;padding:2px 12px;font-size:11px;font-weight:800;margin-bottom:12px;letter-spacing:.5px;color:#fff;background:var(--gold);}
+  .section-label.red{background:var(--red);}
+  .section-label.teal{background:var(--teal);}
+
+  .pill{display:inline-block;border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700;margin:3px 4px;border:1.5px solid;}
+
+  table{width:100%;border-collapse:collapse;margin-top:12px;}
+  th{background:var(--grad);color:#fff;padding:7px 10px;text-align:left;font-size:12px;}
+  td{padding:6px 10px;border-bottom:1px solid #e0d8cc;color:var(--dark);font-size:12px;}
+  tr:nth-child(even) td{background:var(--sand);}
+  tr:nth-child(odd) td{background:#fff;}
+
+  .row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  .role-card{flex:1;min-width:200px;background:#fff;border:2px solid var(--red);border-radius:12px;padding:16px;box-shadow:0 2px 12px rgba(192,57,43,.12);}
+  .explore-card{flex:1;min-width:200px;background:#fff;border:2px solid var(--teal);border-radius:12px;padding:16px;box-shadow:0 2px 12px rgba(14,140,140,.12);}
+  .card-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-right:8px;}
+  .card-head{display:flex;align-items:center;margin-bottom:10px;}
+  .card-head span{font-weight:800;font-size:14px;}
+  .role-card .card-icon{background:var(--red);}
+  .role-card .card-head span{color:var(--red);}
+  .explore-card .card-icon{background:var(--teal);}
+  .explore-card .card-head span{color:var(--teal);}
+  ul.bullets{padding-left:16px;margin:6px 0;}
+  ul.bullets li{font-size:12px;margin-bottom:5px;color:var(--dark);}
+
+  .info-box{border-radius:8px;padding:12px;margin-top:10px;}
+  .info-box.teal{background:var(--teal-light);border:1px solid rgba(14,140,140,.3);}
+  .info-box.red{background:var(--red-light);border:1px solid rgba(192,57,43,.3);}
+  .info-box.sand{background:var(--sand);border:1px solid #ddd;}
+  .info-box.grad{background:var(--grad-soft);border:1.5px solid #ccc;}
+
+  .tag-badge{background:var(--red);color:#fff;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;margin-right:4px;display:inline-block;}
+  .tag-badge.teal{background:var(--teal);}
+
+  .step-item{display:flex;align-items:flex-start;gap:10px;background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:8px;}
+  .step-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#fff;flex-shrink:0;}
+
+  .layer-box{border-radius:8px;padding:12px;margin-bottom:10px;}
+  .layer-box .tags-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+  .layer-box .tag-item{font-size:12px;color:var(--dark);background:#fff;border-radius:4px;padding:3px 8px;}
+
+  .mono{font-family:monospace;font-size:12px;color:var(--dark);white-space:pre-wrap;background:var(--sand);border-radius:4px;padding:10px;}
+
+  .funnel-step{flex:1;min-width:130px;background:#fff;border-radius:10px;padding:14px;text-align:center;}
+  .arrow-sep{display:flex;align-items:center;font-size:20px;color:#aaa;}
+
+  /* Capa */
+  .capa-logo{display:inline-block;background:var(--grad);border-radius:14px;padding:10px 32px;margin-bottom:16px;}
+  .capa-logo span{color:#fff;font-weight:900;font-size:22px;letter-spacing:1px;}
+  .capa-brands{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+  .capa-brand{border-radius:10px;padding:10px 20px;}
+  .capa-brand.role{background:var(--red-light);border:2px solid var(--red);}
+  .capa-brand.explore{background:var(--teal-light);border:2px solid var(--teal);}
+  .capa-brand .brand-name{font-weight:800;font-size:15px;}
+  .capa-brand .brand-sub{font-size:12px;color:var(--dark);margin-top:3px;}
+  .capa-brand.role .brand-name{color:var(--red);}
+  .capa-brand.explore .brand-name{color:var(--teal);}
+  .pills-wrap{display:flex;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+
+  .two-col-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:540px){.two-col-grid{grid-template-columns:1fr;}.row{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div id="proj-name">🌿 Role Explore Experience</div>
+  <div id="slide-counter"></div>
+</div>
+
+<div id="card">
+  <div id="slide-header">
+    <div id="slide-tag"></div>
+    <div id="slide-title"></div>
+  </div>
+  <div id="slide-body"></div>
+</div>
+
+<div id="nav">
+  <button class="nav-btn" id="prev-btn" onclick="go(-1)">← Anterior</button>
+  <div id="dots"></div>
+  <button class="nav-btn" id="next-btn" onclick="go(1)">Próximo →</button>
+</div>
+
+<div id="index"></div>
+
+<script>
+const RED='#C0392B',TEAL='#0e8c8c',GOLD='#c9902a';
+
+const slides=[
+  // 1 CAPA
+  {tag:'APRESENTAÇÃO EXECUTIVA',title:'Role Explore Experience',html:`
+    <div style="text-align:center;padding:10px 0">
+      <div class="capa-logo"><span>🌿 Role Explore Experience</span></div>
+      <div class="capa-brands">
+        <div class="capa-brand role"><div class="brand-name">📱 Role SLZ</div><div class="brand-sub">+300k seguidores</div></div>
+        <div style="font-size:22px;color:#aaa;align-self:center">×</div>
+        <div class="capa-brand explore"><div class="brand-name">🏜️ Explore Atins</div><div class="brand-sub">Operadora Lençóis</div></div>
+      </div>
+      <div class="pills-wrap">
+        <span class="pill" style="border-color:${RED};color:${RED}">Conteúdo Collab</span>
+        <span class="pill" style="border-color:${TEAL};color:${TEAL}">Tráfego Pago 50/50</span>
+        <span class="pill" style="border-color:${RED};color:${RED}">Comissão por Passeio</span>
+        <span class="pill" style="border-color:${TEAL};color:${TEAL}">Concierge + Cupom</span>
+        <span class="pill" style="border-color:${GOLD};color:${GOLD}">São João + Lençóis</span>
+      </div>
+      <div class="info-box grad" style="display:inline-block;text-align:left;max-width:460px;">
+        <div style="font-weight:800;font-size:13px;margin-bottom:6px;background:linear-gradient(135deg,${RED},${TEAL});-webkit-background-clip:text;-webkit-text-fill-color:transparent">🌿 Proposta de Valor</div>
+        <div style="font-size:14px;color:#1a1a1a">"Maranhão completo: São Luís, Raposa, Barreirinhas, Atins e Santo Amaro — do conteúdo ao fechamento, sem perrengue."</div>
+      </div>
+    </div>`
+  },
+  // 2 QUEM SOMOS
+  {tag:'CONTEXTO',title:'Quem Somos',html:`
+    <div class="section-label">As duas partes da parceria</div>
+    <div class="row">
+      <div class="role-card">
+        <div class="card-head"><div class="card-icon">📱</div><span>Role SLZ</span></div>
+        <ul class="bullets">
+          <li>+300k seguidores — maior autoridade de roteiros do Maranhão</li>
+          <li>Audiência engajada: moradores, turistas e viajantes</li>
+          <li>Opera: City Tour, Raposa, São João + Val Paraíso (a confirmar)</li>
+          <li>Rede de parceiros locais com cupom ROLE SLZ</li>
+          <li>Concierge integrado nos roteiros do cliente</li>
+          <li>Produção de conteúdo estilo 'Sampa Dicas'</li>
+          <li>Assessoria de tráfego pago para a Explore Atins</li>
+        </ul>
+      </div>
+      <div class="explore-card">
+        <div class="card-head"><div class="card-icon">🏜️</div><span>Explore Atins</span></div>
+        <ul class="bullets">
+          <li>Operadora especializada em Lençóis Maranhenses</li>
+          <li>Foco: passeios e experiências — principal receita</li>
+          <li>Pacotes Barreirinhas 3D e Atins 4D</li>
+          <li>Bate-voltas: Barreirinhas / Atins / Santo Amaro</li>
+          <li>Operação consolidada 7 dias na semana</li>
+          <li>Acesso a restaurantes parceiros nos destinos</li>
+        </ul>
+      </div>
+    </div>
+    <div class="info-box teal"><strong style="color:${TEAL}">Sinergia:</strong> Audiência massiva (Role) + operação premium nos Lençóis (Explore) + conteúdo de autoridade = produto completo que nenhum dos dois entrega sozinho.</div>`
+  },
+  // 3 TESE
+  {tag:'ESTRATÉGIA',title:'Tese de Crescimento',html:`
+    <div class="section-label">Motor de volume + upsell + conteúdo</div>
+    <div class="row" style="margin-bottom:14px">
+      <div class="funnel-step" style="border:2px solid ${TEAL};box-shadow:0 2px 8px rgba(14,140,140,.15)">
+        <div style="font-size:24px;margin-bottom:4px">🚌</div>
+        <div style="font-weight:800;color:${TEAL};margin-bottom:4px;font-size:13px">Bate-Volta</div>
+        <div style="font-size:12px">Motor de volume e captação. Baixo custo, alta recorrência. <strong>Porta de entrada</strong> para pacotes maiores.</div>
+      </div>
+      <div class="arrow-sep">➡️</div>
+      <div class="funnel-step" style="border:2px solid ${RED};box-shadow:0 2px 8px rgba(192,57,43,.15)">
+        <div style="font-size:24px;margin-bottom:4px">📦</div>
+        <div style="font-weight:800;color:${RED};margin-bottom:4px;font-size:13px">Upsell Pacotes</div>
+        <div style="font-size:12px">Quem faz o bate-volta <strong>quer voltar</strong>. Oferta natural: 3D Barreirinhas ou 4D Atins.</div>
+      </div>
+      <div class="arrow-sep">➡️</div>
+      <div class="funnel-step" style="border:2px solid ${GOLD};box-shadow:0 2px 8px rgba(201,144,42,.15)">
+        <div style="font-size:24px;margin-bottom:4px">🎬</div>
+        <div style="font-weight:800;color:${GOLD};margin-bottom:4px;font-size:13px">Conteúdo Collab</div>
+        <div style="font-size:12px">Viagem conjunta em <strong>abril/maio</strong>. Prévias já com materiais existentes da Explore.</div>
+      </div>
+    </div>
+    <table><tr><th>Produto</th><th>Função no Funil</th><th>Volume Esperado</th></tr>
+    <tr><td>Bate-volta (3 destinos)</td><td>Captação + prova social</td><td>Alto — motor de volume</td></tr>
+    <tr><td>Pacote 3D Barreirinhas</td><td>Conversão mid</td><td>Médio</td></tr>
+    <tr><td>Pacote 4D Atins</td><td>Conversão premium</td><td>Médio</td></tr>
+    <tr><td>São João + Hotel</td><td>Pico sazonal (junho)</td><td>Alto sazonal</td></tr>
+    <tr><td>Restaurantes/Experiências Parceiras</td><td>Concierge + cupom ROLE SLZ</td><td>Recorrente</td></tr></table>`
+  },
+  // 4 MODELO DE NEGÓCIO
+  {tag:'COMERCIAL',title:'Modelo de Negócio',html:`
+    <div class="section-label">Cada parte opera o que é seu — comissão sobre valor net</div>
+    <div class="row">
+      <div class="role-card">
+        <div class="card-head"><div class="card-icon">📍</div><span>Role SLZ Entrega</span></div>
+        <ul class="bullets">
+          <li>City Tour, Raposa, Val Paraíso (a confirmar), São João</li>
+          <li>Assessoria de tráfego pago para Explore</li>
+          <li>Produção de conteúdo Collab</li>
+          <li>Concierge com cupom ROLE SLZ nos roteiros</li>
+          <li>Indicação de restaurantes e experiências em SLZ</li>
+        </ul>
+      </div>
+      <div class="explore-card">
+        <div class="card-head"><div class="card-icon">🏜️</div><span>Explore Atins Entrega</span></div>
+        <ul class="bullets">
+          <li>Bate-voltas (Barreirinhas / Atins / Santo Amaro)</li>
+          <li>Pacote 3D Barreirinhas e 4D Atins</li>
+          <li>Acesso a parceiros locais nos destinos</li>
+          <li>Foco em passeios — principal receita</li>
+        </ul>
+      </div>
+    </div>
+    <div class="info-box teal">
+      <strong style="color:${TEAL}">Modelo de comissão:</strong>
+      <ul class="bullets" style="margin-top:6px">
+        <li>Role SLZ recebe sobre o valor NET dos passeios da Explore</li>
+        <li>Cross-sell: Explore indica SLZ/Raposa/São João → Explore recebe comissão sobre valor net de Role</li>
+        <li>Parceiros (restaurantes, experiências): cupom ROLE SLZ rastreia → comissão combinada</li>
+        <li>Status para comissão: "Confirmado" somente após pagamento efetuado</li>
+      </ul>
+    </div>
+    <table style="margin-top:10px"><tr><th>Rastreio</th><th>Como funciona</th></tr>
+    <tr><td>Cupom ROLE SLZ</td><td>Usado em restaurantes e experiências parceiras — rastreia indicações</td></tr>
+    <tr><td>Tag no WhatsApp/CRM</td><td>Lead tagueado com origem no primeiro contato</td></tr>
+    <tr><td>Planilha de status</td><td>Atualizada semanalmente: origem, produto, status, valor net, comissão</td></tr></table>`
+  },
+  // 5 CONTEÚDO COLLAB
+  {tag:'CONTEÚDO',title:'Estratégia de Conteúdo — Estilo Sampa Dicas',html:`
+    <div class="section-label red">Role SLZ produz. Explore abre os destinos.</div>
+    <div style="background:#fff;border:2px solid ${RED};border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 2px 10px rgba(192,57,43,.12)">
+      <div style="font-weight:800;color:${RED};margin-bottom:8px">🎬 Viagem de Produção — Abril/Maio</div>
+      <ul class="bullets">
+        <li>Role SLZ vai a campo com a Explore nos 3 destinos (Atins, Barreirinhas, Santo Amaro)</li>
+        <li>Produção de Reels Collab, carrosséis e stories com cara de conteúdo real</li>
+        <li>Formato: roteiros práticos, preços, dicas, "o que fazer em X horas", restaurantes</li>
+        <li>Captação de restaurantes e estabelecimentos locais para o concierge com cupom ROLE SLZ</li>
+        <li>Enquanto a viagem não acontece: prévias com materiais existentes da Explore</li>
+      </ul>
+    </div>
+    <div class="row">
+      <div style="flex:1;min-width:160px;background:#fff;border:2px solid ${TEAL};border-radius:10px;padding:12px">
+        <div style="font-weight:700;color:${TEAL};margin-bottom:6px">🍽️ Captação de Parceiros Locais</div>
+        <ul class="bullets">
+          <li>Restaurantes em Atins, Barreirinhas e Santo Amaro</li>
+          <li>Experiências locais (artesanato, culinária, passeios extras)</li>
+          <li>Entram no roteiro do cliente via concierge</li>
+          <li>Cupom ROLE SLZ rastreia e gera comissão</li>
+        </ul>
+      </div>
+      <div style="flex:1;min-width:160px;background:#fff;border:2px solid ${GOLD};border-radius:10px;padding:12px">
+        <div style="font-weight:700;color:${GOLD};margin-bottom:6px">📱 Estilo de Conteúdo</div>
+        <ul class="bullets">
+          <li>Real e prático — como Sampa Dicas faz em São Paulo</li>
+          <li>Sem cara de anúncio: roteiro real, opinião real</li>
+          <li>Role SLZ + Explore no mesmo vídeo</li>
+          <li>Objetivo: entregar o roteiro completo pronto ao seguidor</li>
+        </ul>
+      </div>
+    </div>`
+  },
+  // 6 CONCIERGE
+  {tag:'CONCIERGE',title:'Concierge + Rede de Parceiros',html:`
+    <div class="section-label teal">Inserir estabelecimentos no roteiro do cliente — cupom rastreável</div>
+    <div class="info-box teal" style="margin-bottom:14px">
+      <strong style="color:${TEAL}">Como funciona:</strong> Ao fechar um passeio ou pacote, o cliente recebe um <strong>roteiro personalizado</strong> com indicações de restaurantes e estabelecimentos parceiros — cada um com cupom exclusivo <span class="tag-badge">ROLE SLZ</span>
+    </div>
+    <table><tr><th>Destino</th><th>Tipo de Parceiro</th><th>Modelo</th><th>Rastreio</th></tr>
+    <tr><td>São Luís</td><td>Restaurantes, bares, experiências culturais, Val Paraíso*</td><td>Cupom + comissão por indicação</td><td>Cupom ROLE SLZ</td></tr>
+    <tr><td>Barreirinhas</td><td>Restaurantes locais, experiências extras</td><td>Cupom + comissão ou divulgação</td><td>Cupom ROLE SLZ</td></tr>
+    <tr><td>Atins</td><td>Restaurantes, pousadas extras, experiências</td><td>Cupom + comissão ou divulgação</td><td>Cupom ROLE SLZ</td></tr>
+    <tr><td>Santo Amaro</td><td>Estabelecimentos locais a mapear</td><td>A definir após viagem de produção</td><td>Cupom ROLE SLZ</td></tr></table>
+    <div class="info-box red" style="margin-top:12px">
+      <div style="font-weight:700;color:${RED};margin-bottom:4px">🗺️ Val Paraíso — São Luís</div>
+      <div style="font-size:12px">Experiência a ser pesquisada e adicionada ao cardápio SLZ como passeio extra ou complemento ao City Tour / Raposa. A confirmar na operação.</div>
+    </div>`
+  },
+  // 7 CARDÁPIO SLZ
+  {tag:'PRODUTOS',title:'Cardápio de Produtos — São Luís',html:`
+    <div style="background:${RED};color:#fff;border-radius:8px;padding:6px 14px;display:inline-block;font-weight:800;font-size:12px;margin-bottom:12px">📍 Módulo Role SLZ</div>
+    <table><tr><th>Produto</th><th>Duração</th><th>Formato</th><th>Upgrade Disponível</th></tr>
+    <tr><td>City Tour SLZ</td><td>Meio período / Dia inteiro</td><td>Compartilhado / Privativo</td><td>Guia exclusivo</td></tr>
+    <tr><td>Raposa Half Day</td><td>4–5h</td><td>Compartilhado / Privativo</td><td>Sunset add-on</td></tr>
+    <tr><td>City Tour + Raposa</td><td>Dia cheio</td><td>Compartilhado / Privativo</td><td>Privativo + jantar</td></tr>
+    <tr><td>Raposa Sunset</td><td>3–4h (tarde)</td><td>Compartilhado / Privativo</td><td>Passeio de barco</td></tr>
+    <tr><td>Val Paraíso</td><td>A definir*</td><td>A definir*</td><td>—</td></tr>
+    <tr><td>Experiências São João</td><td>Noite / Dia</td><td>Roteiro cultural</td><td>Combo com hotel</td></tr></table>
+    <div class="info-box red" style="margin-top:12px">
+      <strong style="color:${RED}">Experiências São João:</strong>
+      <ul class="bullets" style="margin-top:6px">
+        <li>Roteiro de arraiais (noite cultural com quadrilhas e forró)</li>
+        <li>Roteiro gastronômico junino (comidas típicas + mercado)</li>
+        <li>City tour temático São João + pontos históricos iluminados</li>
+      </ul>
+    </div>`
+  },
+  // 8 CARDÁPIO LENÇÓIS
+  {tag:'PRODUTOS',title:'Cardápio de Produtos — Lençóis',html:`
+    <div style="background:${TEAL};color:#fff;border-radius:8px;padding:6px 14px;display:inline-block;font-weight:800;font-size:12px;margin-bottom:12px">🌊 Módulo Explore Atins — foco em passeios</div>
+    <table><tr><th>Produto</th><th>Dias</th><th>Inclui</th><th>Upgrade</th></tr>
+    <tr><td>Bate-volta Barreirinhas</td><td>1 dia</td><td>Transfer + passeio base</td><td>Pernoite add-on</td></tr>
+    <tr><td>Bate-volta Atins</td><td>1 dia</td><td>Transfer + passeio base</td><td>Pernoite add-on</td></tr>
+    <tr><td>Bate-volta Santo Amaro</td><td>1 dia</td><td>Transfer + passeio base</td><td>Combo 2 bate-voltas</td></tr>
+    <tr><td>Pacote 3D Barreirinhas</td><td>3 dias/2 noites</td><td>Hospedagem + passeios principais</td><td>Privativo / extras</td></tr>
+    <tr><td>Pacote 4D Atins</td><td>4 dias/3 noites</td><td>Hospedagem + passeios + lagoas</td><td>Privativo / extras</td></tr></table>
+    <div class="row" style="margin-top:12px">
+      <div style="flex:1;min-width:180px;background:#fff;border:2px solid ${TEAL};border-radius:8px;padding:12px">
+        <div style="font-weight:700;color:${TEAL};margin-bottom:6px">🚌 Bate-volta como estratégia</div>
+        <div style="font-size:12px">Produto de <strong>volume e captação</strong>. Menor barreira de entrada, gera prova social e alimenta upsell para 3D/4D.</div>
+      </div>
+      <div style="flex:1;min-width:180px;background:#fff;border:2px solid ${GOLD};border-radius:8px;padding:12px">
+        <div style="font-weight:700;color:${GOLD};margin-bottom:6px">📦 Combos sugeridos</div>
+        <div style="font-size:12px">Bate-volta + pernoite · 2 bate-voltas em fins de semana diferentes · Bate-volta + 1 noite como "degustação" do 3D</div>
+      </div>
+    </div>`
+  },
+  // 9 HOTELARIA
+  {tag:'HOTELARIA',title:'Receita Extra: Hospedagem em São Luís',html:`
+    <div class="section-label">Parceria com hotel — 3 modelos comerciais</div>
+    <table><tr><th>Modelo</th><th>Como funciona</th><th>Margem</th><th>Risco</th></tr>
+    <tr><td>Tarifa Net</td><td>Role compra a diária com desconto e revende com margem</td><td>(D_venda – D_net) × noites</td><td>Role absorve cancelamento</td></tr>
+    <tr><td>Comissão</td><td>Hotel recebe e repassa % após check-out</td><td>% × D_venda × noites</td><td>Baixo — depende do repasse</td></tr>
+    <tr><td>Bloqueio de Quartos</td><td>Contingente para São João com regras de release</td><td>Net ou comissão no bloco</td><td>Release: liberar vagas até D-X</td></tr></table>
+    <div class="info-box red" style="margin-top:12px">
+      <strong style="color:${RED}">Fórmula de margem:</strong>
+      <div class="mono" style="margin-top:6px">Margem = (D_venda – D_net) × N_noites
+Ex: (R$350 – R$250) × 2 noites = <strong>R$200 de margem</strong></div>
+    </div>
+    <ul class="bullets" style="margin-top:10px">
+      <li>Confirmação por escrito: nome completo, CPF e datas</li>
+      <li>Cancelamento: até D-7 sem custo / após D-7 cobra 1 diária</li>
+      <li>Rastreio: código de reserva + planilha de status</li>
+    </ul>`
+  },
+  // 10 FUNIL
+  {tag:'FUNIL',title:'Funil de Vendas — Meta Ads Collab',html:`
+    <div class="section-label teal">3 camadas: Cold → Warm → Hot</div>
+    <div class="layer-box" style="background:#e8f0fd;border:2px solid #1565c0;margin-bottom:10px">
+      <div style="font-weight:800;color:#1565c0;margin-bottom:6px">🥶 COLD — Aquisição</div>
+      <div class="tags-wrap">
+        <span class="tag-item" style="border:1px solid #1565c033">Reels/Posts em Collab impulsionados</span>
+        <span class="tag-item" style="border:1px solid #1565c033">Meta Ads: objetivo Mensagens/WhatsApp</span>
+        <span class="tag-item" style="border:1px solid #1565c033">Público: interesses viagem, Maranhão, turismo</span>
+        <span class="tag-item" style="border:1px solid #1565c033">CTA: palavra-chave → WhatsApp automático</span>
+      </div>
+    </div>
+    <div class="layer-box" style="background:#fdf5e6;border:2px solid ${GOLD};margin-bottom:10px">
+      <div style="font-weight:800;color:${GOLD};margin-bottom:6px">🔥 WARM — Consideração</div>
+      <div class="tags-wrap">
+        <span class="tag-item" style="border:1px solid ${GOLD}33">Remarketing: views >50%, engajamento, visitantes do perfil</span>
+        <span class="tag-item" style="border:1px solid ${GOLD}33">Criativos: prova social, depoimentos, "vagas restantes"</span>
+        <span class="tag-item" style="border:1px solid ${GOLD}33">CTA: BATEVOLTA / 3DIAS / ATINS</span>
+      </div>
+    </div>
+    <div class="layer-box" style="background:var(--red-light);border:2px solid ${RED}">
+      <div style="font-weight:800;color:${RED};margin-bottom:6px">💰 HOT — Fechamento</div>
+      <div class="tags-wrap">
+        <span class="tag-item" style="border:1px solid ${RED}33">Remarketing: iniciadores de conversa + alto engajamento</span>
+        <span class="tag-item" style="border:1px solid ${RED}33">Urgência: "última vaga", "saída confirmada este sábado"</span>
+        <span class="tag-item" style="border:1px solid ${RED}33">CTA: VIP / SAOJOAO / oferta limitada</span>
+      </div>
+    </div>
+    <div class="info-box teal" style="margin-top:10px">
+      <strong style="color:${TEAL}">Palavras-chave WhatsApp: </strong>
+      <span class="tag-badge">3DIAS</span><span class="tag-badge">ATINS</span><span class="tag-badge">BATEVOLTA</span><span class="tag-badge">SANTOAMARO</span><span class="tag-badge">SAOJOAO</span><span class="tag-badge">VIP</span><span class="tag-badge">PASSEIOS</span>
+    </div>`
+  },
+  // 11 GRUPO VIP
+  {tag:'GRUPO VIP',title:'Estratégia Grupo/Lista VIP WhatsApp',html:`
+    <div class="section-label teal">Formato + Operação + Conversão</div>
+    <div class="row">
+      <div style="flex:1;min-width:160px;background:#fff;border:2px solid ${TEAL};border-radius:10px;padding:12px">
+        <div style="font-weight:700;color:${TEAL};margin-bottom:6px">📋 Formato recomendado</div>
+        <div style="font-size:12px"><strong>Lista de Transmissão</strong> para mensagens em massa<br><br><strong>Grupo VIP</strong> para prova social e engajamento (máx. 1 post participativo/semana)</div>
+      </div>
+      <div style="flex:1;min-width:160px;background:#fff;border:2px solid ${RED};border-radius:10px;padding:12px">
+        <div style="font-weight:700;color:${RED};margin-bottom:6px">🚪 Entrada</div>
+        <div style="font-size:12px">Palavra-chave no WhatsApp:<br>
+        <span class="tag-badge" style="margin-top:6px;display:inline-block">VIP</span> <span class="tag-badge">BATEVOLTA</span> <span class="tag-badge">LENCOIS</span><br><br>→ Resposta automática com boas-vindas + link para entrar no grupo</div>
+      </div>
+    </div>
+    <table style="margin-top:12px"><tr><th>Cadência</th><th>Tipo de Conteúdo</th><th>Objetivo</th></tr>
+    <tr><td>2× por semana</td><td>Datas disponíveis + vagas abertas</td><td>Lotação e urgência</td></tr>
+    <tr><td>1× por semana</td><td>Prova social (foto/vídeo de viajante)</td><td>Confiança</td></tr>
+    <tr><td>1× por semana</td><td>Roteiro pronto / dica exclusiva</td><td>Nutrição</td></tr>
+    <tr><td>Pontual</td><td>Alerta: "Saída confirmada sábado — 2 vagas"</td><td>Conversão imediata</td></tr>
+    <tr><td>Pontual</td><td>"Fila de espera aberta para X data"</td><td>Escassez</td></tr></table>
+    <div class="info-box teal" style="margin-top:10px"><strong style="color:${TEAL}">Conversão:</strong> "Responda com a DATA que quer ir" → atendimento 1:1 → fechamento</div>`
+  },
+  // 12 SÃO JOÃO
+  {tag:'SÃO JOÃO',title:'Campanha Sazonal: São João',html:`
+    <div class="section-label red">Maior pico de demanda do ano</div>
+    <div style="background:var(--red-light);border:2px solid ${RED};border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="font-weight:800;color:${RED};font-size:14px;margin-bottom:8px">🎉 Oferta principal: "São João em São Luís"</div>
+      <ul class="bullets">
+        <li>2 a 4 noites + City Tour/Raposa + Experiências São João + Hotel</li>
+        <li>Upsell: adicione Lençóis (3D Barreirinhas ou 4D Atins) após o São João</li>
+        <li>Urgência: bloqueio de quartos com vagas limitadas</li>
+        <li>Cupom ROLE SLZ ativo em restaurantes e experiências parceiras</li>
+      </ul>
+    </div>
+    <table><tr><th>Fase</th><th>Período</th><th>Ação</th></tr>
+    <tr><td>Pré-campanha</td><td>6 semanas antes</td><td>Reels arraiais, contagem regressiva, convite Grupo VIP, fila de espera hotel</td></tr>
+    <tr><td>Pico</td><td>3 semanas antes até São João</td><td>Anúncios urgência, últimas vagas, live/stories, oferta combo</td></tr>
+    <tr><td>Pós-campanha</td><td>1–2 semanas depois</td><td>Upsell → Lençóis: "Curtiu SLZ? Agora vai pros Lençóis"</td></tr></table>`
+  },
+  // 13 ADS 50/50
+  {tag:'MÍDIA PAGA',title:'Meta Ads Collab — Regra 50/50',html:`
+    <div class="section-label">Apenas campanhas Collab — investimento inicial R$500–R$1.000/mês</div>
+    <div class="info-box sand" style="margin-bottom:14px"><strong style="color:${TEAL}">Escopo do 50/50:</strong> Aplica-se <strong>somente às campanhas veiculadas em Collab</strong>. Campanhas individuais de cada parte são custeadas por quem as opera.</div>
+    <div class="row">
+      <div style="flex:1;min-width:180px;background:#fff;border:2px solid ${RED};border-radius:10px;padding:14px">
+        <div style="font-weight:800;color:${RED};margin-bottom:6px">Modelo A — Reembolso</div>
+        <ul class="bullets"><li>Uma conta paga 100%</li><li>Outra reembolsa 50% a cada 7–14 dias via PIX</li><li>Relatório do Ads Manager como comprovante</li></ul>
+      </div>
+      <div style="flex:1;min-width:180px;background:#fff;border:2px solid ${TEAL};border-radius:10px;padding:14px">
+        <div style="font-weight:800;color:${TEAL};margin-bottom:6px">Modelo B — Alternância</div>
+        <ul class="bullets"><li>Mês 1: Role paga 100%</li><li>Mês 2: Explore paga 100%</li><li>Acerto mensal com base nos relatórios</li></ul>
+      </div>
+    </div>
+    <table><tr><th>Métrica Real (benchmarks atuais)</th><th>Valor</th></tr>
+    <tr><td>Investimento inicial mensal (Collab)</td><td>R$ 500 – R$ 1.000</td></tr>
+    <tr><td>Custo por conversa (CPCv)</td><td>R$ 3 – R$ 5</td></tr>
+    <tr><td>Conversas estimadas/mês (base R$750)</td><td>150 – 250 conversas</td></tr>
+    <tr><td>Taxa de fechamento (Ads)</td><td>~5%</td></tr>
+    <tr><td>Vendas estimadas/mês</td><td>8 – 12 vendas</td></tr></table>`
+  },
+  // 14 CALENDÁRIO
+  {tag:'CONTEÚDO',title:'Calendário de Conteúdo — 30 dias',html:`
+    <div class="section-label">16 peças mínimas — Collab-first + prévias com materiais existentes</div>
+    <table style="font-size:11px"><tr><th>Semana</th><th>Peça</th><th>Formato</th><th>CTA</th></tr>
+    <tr><td>S1 (prévia)</td><td>Reel prévia — Bate-volta Barreirinhas (material existente)</td><td>Reel 30–60s</td><td>BATEVOLTA</td></tr>
+    <tr><td>S1 (prévia)</td><td>Reel prévia — Bate-volta Atins (material existente)</td><td>Reel 30–60s</td><td>ATINS</td></tr>
+    <tr><td>S1</td><td>Convite Grupo VIP</td><td>Story + post</td><td>VIP</td></tr>
+    <tr><td>S2</td><td>Reel Collab — Bate-volta Santo Amaro</td><td>Reel 30–60s</td><td>SANTOAMARO</td></tr>
+    <tr><td>S2</td><td>Reel — Pacotes 3D/4D comparativo</td><td>Reel 30–60s</td><td>3DIAS</td></tr>
+    <tr><td>S2</td><td>Carrossel "Roteiro pronto Lençóis"</td><td>Carrossel 5–8 slides</td><td>LENCOIS</td></tr>
+    <tr><td>S3</td><td>Prova social — Depoimento viajante</td><td>Reel ou story</td><td>PASSEIOS</td></tr>
+    <tr><td>S3</td><td>Reel São João — Arraiais + roteiro</td><td>Reel 30–60s</td><td>SAOJOAO</td></tr>
+    <tr><td>S3</td><td>Story enquete: "Qual destino você escolhe?"</td><td>Stories</td><td>—</td></tr>
+    <tr><td>S3</td><td>Post parceiro local (restaurante Atins/Barr.)</td><td>Post + stories</td><td>ROLE SLZ cupom</td></tr>
+    <tr><td>S4</td><td>Reel comparativo Barreirinhas vs Atins</td><td>Reel 30–60s</td><td>ATINS</td></tr>
+    <tr><td>S4</td><td>Prova social #2 — Foto/vídeo viajante</td><td>Post/Reel</td><td>PASSEIOS</td></tr>
+    <tr><td>S4</td><td>Carrossel São João + Hotel</td><td>Carrossel</td><td>SAOJOAO</td></tr>
+    <tr><td>S4</td><td>Reel urgência — "Vagas restantes"</td><td>Reel curto</td><td>VIP</td></tr>
+    <tr><td>Mensal</td><td>2× stories semanais com caixinha + CTA</td><td>Stories</td><td>Variado</td></tr>
+    <tr><td>Mensal</td><td>Alerta Grupo VIP: datas confirmadas</td><td>Lista/Grupo WA</td><td>Responda com data</td></tr></table>`
+  },
+  // 15 OPERAÇÃO
+  {tag:'OPERAÇÃO',title:'Operação & Responsabilidades',html:`
+    <div class="section-label">Sem conflito — cada um no seu campo</div>
+    <div class="row">
+      <div class="role-card">
+        <div class="card-head"><div class="card-icon">📍</div><span>Role SLZ</span></div>
+        <ul class="bullets">
+          <li>Criação de conteúdo e Reels Collab</li>
+          <li>Assessoria de tráfego pago (Explore)</li>
+          <li>Captação e qualificação inicial</li>
+          <li>Operação City Tour, Raposa, Val Paraíso e São João</li>
+          <li>Gestão concierge e parceiros com cupom ROLE SLZ</li>
+          <li>Gestão do Grupo VIP e lista de transmissão</li>
+          <li>Relacionamento com hotel parceiro</li>
+        </ul>
+      </div>
+      <div class="explore-card">
+        <div class="card-head"><div class="card-icon">🏜️</div><span>Explore Atins</span></div>
+        <ul class="bullets">
+          <li>Atendimento e fechamento de Lençóis</li>
+          <li>Operação bate-voltas e pacotes</li>
+          <li>Curadoria de restaurantes/experiências locais</li>
+          <li>Suporte operacional 7 dias</li>
+          <li>Atualização de datas e vagas para o Grupo VIP</li>
+        </ul>
+      </div>
+    </div>
+    <div class="info-box sand">
+      <strong>Protocolo de Handoff:</strong>
+      <div class="mono" style="margin-top:6px">🔁 REPASSE DE LEAD | Nome: [Nome] | WhatsApp: [Nº] | Datas: [entrada→saída]
+Nº pax: [Adultos+crianças] | Produto: [Produto] | Formato: [Compartilhado/Privativo]
+Origem: [Cupom/código] | Obs: [anotações livres]</div>
+    </div>
+    <div style="margin-top:10px;background:#fff;border:1.5px solid ${TEAL};border-radius:8px;padding:10px;font-size:13px">
+      <strong style="color:${TEAL}">SLA:</strong> Resposta em até <strong>10 minutos</strong> (9h–20h) · Fora do horário: mensagem automática de confirmação
+    </div>`
+  },
+  // 16 PROJEÇÕES
+  {tag:'PROJEÇÕES',title:'Projeções — 3 Cenários',html:`
+    <div class="section-label teal">CPCv R$3–5 · Fechamento 5% · Ads Collab R$500–1.000/mês</div>
+    <table><tr><th>Métrica</th><th>Conservador</th><th>Base</th><th>Agressivo</th></tr>
+    <tr><td>Investimento Collab/mês</td><td>R$ 500</td><td>R$ 750</td><td>R$ 1.000</td></tr>
+    <tr><td>CPCv (custo/conversa)</td><td>R$ 5</td><td>R$ 4</td><td>R$ 3</td></tr>
+    <tr><td>Conversas/mês</td><td>100</td><td>187</td><td>333</td></tr>
+    <tr><td>Taxa de fechamento</td><td>5%</td><td>5%</td><td>5%</td></tr>
+    <tr><td>Vendas/mês (Ads)</td><td>5</td><td>9</td><td>17</td></tr>
+    <tr><td>+ Orgânico / Grupo VIP (est.)</td><td>+2–3</td><td>+3–5</td><td>+5–8</td></tr>
+    <tr><td><strong>Total vendas/mês (est.)</strong></td><td><strong>7–8</strong></td><td><strong>12–14</strong></td><td><strong>22–25</strong></td></tr>
+    <tr><td>Receita estimada (×T_médio)</td><td>R$ 7×T</td><td>R$ 13×T</td><td>R$ 24×T</td></tr>
+    <tr><td>Comissão Role (est.)</td><td>R$ C×7</td><td>R$ C×13</td><td>R$ C×24</td></tr>
+    <tr><td>Comissão Explore (est.)</td><td>R$ C×7</td><td>R$ C×13</td><td>R$ C×24</td></tr></table>
+    <div style="background:#fff;border:1.5px solid ${TEAL};border-radius:8px;padding:10px;margin-top:10px;font-size:12px">
+      <strong style="color:${TEAL}">Fórmulas:</strong> Conversas = Investimento ÷ CPCv &nbsp;|&nbsp; Vendas Ads = Conversas × 5%<br>
+      Receita = Vendas × ticket médio por mix de produtos<br>
+      <strong style="color:${RED}">Break-even:</strong> Comissão total ≥ investimento em Ads
+    </div>`
+  },
+  // 17 ATIVAÇÃO
+  {tag:'ATIVAÇÃO',title:'Plano de Ativação — 30 dias + Viagem',html:`
+    <div class="section-label">Semana a semana + viagem de produção Abril/Maio</div>
+    <table><tr><th>Fase</th><th>Foco</th><th>Entregáveis</th></tr>
+    <tr><td>S1 — Setup</td><td>Estrutura</td><td>Cardápio finalizado · cupons/links ativos · scripts WA · Grupo VIP criado · prévias selecionadas</td></tr>
+    <tr><td>S2 — Lançamento</td><td>Volume</td><td>Campanhas Collab no ar · 2 Reels prévias publicados · convite Grupo VIP · primeiros leads</td></tr>
+    <tr><td>S3 — Prova Social</td><td>Engajamento</td><td>Remarketing ativo · depoimento #1 · 1ª data de bate-volta "saída confirmada"</td></tr>
+    <tr><td>S4 — Escala</td><td>Otimização</td><td>Criativo vencedor duplicado · ajuste de premissas com dados reais</td></tr>
+    <tr><td>Abr/Mai — Viagem</td><td>Produção</td><td>Role SLZ a campo com Explore · gravação Reels nos 3 destinos · captação de parceiros para concierge</td></tr></table>
+    <div class="info-box red" style="margin-top:12px">
+      <strong style="color:${RED}">Linha do tempo São João:</strong>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:130px;background:#fff;border:1.5px solid ${RED};border-radius:6px;padding:10px">
+          <div style="font-weight:700;color:${RED};font-size:11px">6 sem antes</div>
+          <div style="font-size:11px;margin-top:4px">Aquecimento: arraiais, contagem regressiva, fila de espera hotel</div>
+        </div>
+        <div style="flex:1;min-width:130px;background:#fff;border:1.5px solid ${RED};border-radius:6px;padding:10px">
+          <div style="font-weight:700;color:${RED};font-size:11px">3 sem antes</div>
+          <div style="font-size:11px;margin-top:4px">Pico: urgência, últimas vagas, live/stories ao vivo</div>
+        </div>
+        <div style="flex:1;min-width:130px;background:#fff;border:1.5px solid ${RED};border-radius:6px;padding:10px">
+          <div style="font-weight:700;color:${RED};font-size:11px">Pós São João</div>
+          <div style="font-size:11px;margin-top:4px">Upsell → Lençóis: "Curtiu SLZ? Agora vai pros Lençóis"</div>
+        </div>
+      </div>
+    </div>`
+  },
+  // 18 PRÓXIMOS PASSOS
+  {tag:'FECHAMENTO',title:'Próximos Passos',html:`
+    <div class="section-label">8 decisões para sair da reunião</div>
+    ${[
+      [RED,'Produtos SLZ: quais entram primeiro + confirmar Val Paraíso'],
+      [RED,'Experiências São João: arraiais, gastronômico, cultural — quais operar'],
+      [TEAL,'Hotel parceiro: definir parceiro + modelo (net / comissão / bloqueio)'],
+      [TEAL,'Modelo de comissão: valor net + % definida por produto'],
+      [RED,'Conta de Ads Collab: Modelo A (reembolso) ou B (alternância mensal)'],
+      [TEAL,'Parceiros locais: lista inicial de restaurantes/experiências para concierge'],
+      [RED,'Viagem de produção: datas em abril/maio + roteiro de gravações'],
+      [TEAL,'Data do 1º bate-volta confirmado + data do 1º Collab impulsionado com prévia'],
+    ].map(([c,t],i)=>`<div class="step-item" style="border:1.5px solid ${c}33;border-left:4px solid ${c}">
+      <div class="step-num" style="background:${c}">${i+1}</div>
+      <div style="font-size:13px">${t}</div>
+    </div>`).join('')}
+    <div class="info-box grad" style="text-align:center;margin-top:4px">
+      <strong style="color:${RED}">Meta:</strong> Sair com <strong>data da 1ª campanha</strong>, <strong>data da viagem de produção</strong> e <strong>responsável por cada item</strong> definidos.
+    </div>`
+  },
+  // 19 ANEXO SCRIPTS
+  {tag:'ANEXO A',title:'Scripts WhatsApp',html:`
+    <div class="section-label teal">Qualificação + Oferta + Fechamento + São João</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${[
+        [TEAL,'🤖 Resposta automática por palavra-chave',`Oi! 👋 Obrigado por entrar em contato!\nPara te atender melhor, me diz:\n1️⃣ Quantas pessoas vão?\n2️⃣ Qual data você tem em mente?\n3️⃣ Prefere passeio de 1 dia (bate-volta) ou quer ficar mais dias?`],
+        [TEAL,'💬 Oferta das 3 opções (após qualificação)',`Perfeito! Tenho 3 opções pra você:\n\n🚌 BATE-VOLTA (1 dia): Sai de manhã, volta à noite. A partir de R$ T_bv.\n\n🏜️ PACOTE 3D BARREIRINHAS: 3 dias/2 noites com hospedagem + passeios. R$ T_3D.\n\n🌊 PACOTE 4D ATINS: 4 dias/3 noites, experiência completa. R$ T_4D.\n\nQual se encaixa melhor?`],
+        [RED,'🎉 Script São João',`São João em São Luís 🎉 Roteiro COMPLETO:\n✅ Hotel incluso | ✅ City Tour + Raposa | ✅ Roteiro de arraiais\n+ Opção de ir pros Lençóis depois!\nVagas limitadas. Quantas pessoas e qual data?`],
+        [RED,'✅ Fechamento',`Ótimo! Para garantir sua vaga:\n1. Seu nome completo\n2. Data de preferência\n3. Nº de pessoas\n\nTe envio o link de pagamento agora. Qual prefere: PIX ou cartão?`],
+      ].map(([c,t,s])=>`<div style="background:#fff;border:1.5px solid ${c};border-radius:8px;padding:10px">
+        <div style="font-weight:700;color:${c};font-size:12px;margin-bottom:6px">${t}</div>
+        <div class="mono">${s}</div>
+      </div>`).join('')}
+    </div>`
+  },
+  // 20 CRM
+  {tag:'ANEXO B',title:'Modelo de Planilha CRM',html:`
+    <div class="section-label teal">Colunas, status, origem, comissões e concierge</div>
+    <table style="font-size:11px"><tr><th>Coluna</th><th>Conteúdo</th><th>Exemplo</th></tr>
+    <tr><td>ID</td><td>Número sequencial</td><td>#001</td></tr>
+    <tr><td>Data contato</td><td>DD/MM/AAAA</td><td>15/06/2025</td></tr>
+    <tr><td>Nome</td><td>Nome completo</td><td>Maria Silva</td></tr>
+    <tr><td>WhatsApp</td><td>Com DDD</td><td>98 9 9999-0000</td></tr>
+    <tr><td>Origem</td><td>Cupom / palavra-chave</td><td>BATEVOLTA / SAOJOAO</td></tr>
+    <tr><td>Quem captou</td><td>Role ou Explore</td><td>Role SLZ</td></tr>
+    <tr><td>Produto interesse</td><td>Produto desejado</td><td>Bate-volta Barreirinhas</td></tr>
+    <tr><td>Datas</td><td>Datas pretendidas</td><td>21–22/06</td></tr>
+    <tr><td>Nº pax</td><td>Adultos + crianças</td><td>2 adultos</td></tr>
+    <tr><td>Status</td><td>Etapa do funil</td><td>Lead / Proposta / Confirmado / Pago / Cancelado</td></tr>
+    <tr><td>Valor total (R$)</td><td>Ticket do produto</td><td>R$ T_bv</td></tr>
+    <tr><td>Valor net (R$)</td><td>Custo da agência</td><td>R$ Net_bv</td></tr>
+    <tr><td>Comissão Role (R$)</td><td>Valor net – custo agência</td><td>R$ C_role</td></tr>
+    <tr><td>Comissão Explore (R$)</td><td>% sobre produto próprio</td><td>R$ C_explore</td></tr>
+    <tr><td>Parceiro concierge</td><td>Indicação no roteiro</td><td>Rest. X — cupom ROLE SLZ</td></tr>
+    <tr><td>Margem hotel (R$)</td><td>Somente se houver hotel</td><td>(D_venda–D_net)×N</td></tr>
+    <tr><td>Data pagamento</td><td>DD/MM/AAAA</td><td>16/06/2025</td></tr>
+    <tr><td>Observações</td><td>Anotações livres</td><td>Quer privativo</td></tr></table>
+    <div class="info-box teal" style="margin-top:10px;font-size:12px">
+      <strong style="color:${TEAL}">Status:</strong> Lead → Em atendimento → Proposta enviada → <strong>Confirmado (após pagamento)</strong> → Realizado → Cancelado
+    </div>`
+  },
+  // 21 COPIES
+  {tag:'ANEXO C',title:'Copies de Anúncios',html:`
+    <div class="section-label">6 copies prontos para uso</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${[
+        [TEAL,'Bate-volta Barreirinhas','🏜️ Lençóis Maranhenses em 1 dia? SIM! Bate-volta saindo cedinho, voltando com a melhor história pra contar. Vagas limitadas por saída. Manda BATEVOLTA no WhatsApp!'],
+        [TEAL,'Bate-volta Atins','🌊 Lagoas cristalinas + dunas douradas em 1 dia. Bate-volta pra Atins — experiência completa sem precisar tirar dias de folga. Manda ATINS agora!'],
+        [TEAL,'Bate-volta Santo Amaro','📍 Santo Amaro dos Lençóis: o destino que poucos conhecem. Bate-volta exclusivo com guia local. Vagas esgotam rápido. Digita SANTOAMARO e garante o seu!'],
+        [GOLD,'Pacote 3D Barreirinhas','🏜️ 3 dias nos Lençóis do jeito certo. Hospedagem + passeios + roteiro pronto. Só curtir. Manda 3DIAS e receba o itinerário completo no WhatsApp.'],
+        [GOLD,'Pacote 4D Atins','🌊 4 dias em Atins — o paraíso que você ainda não foi. Lagoas remotas, pôr do sol inesquecível, hospedagem selecionada. Manda ATINS e garante sua vaga!'],
+        [RED,'São João + Hotel','🎉 São João em São Luís do jeito completo: arraial + forró + hotel incluso + City Tour + Raposa. Roteiro pronto, opção de ir pros Lençóis depois. Vagas limitadas! Digita SAOJOAO agora.'],
+      ].map(([c,d,t],i)=>`<div style="background:#fff;border:1.5px solid ${c};border-left:4px solid ${c};border-radius:8px;padding:10px">
+        <div style="font-weight:700;color:${c};font-size:11px;margin-bottom:4px">#${i+1} — ${d}</div>
+        <div style="font-size:12px">${t}</div>
+      </div>`).join('')}
+    </div>`
+  },
+  // 22 GRUPO VIP REGRAS
+  {tag:'ANEXO D',title:'Regras do Grupo VIP',html:`
+    <div class="section-label teal">Texto de boas-vindas + regras operacionais</div>
+    <div style="background:#fff;border:2px solid ${TEAL};border-radius:12px;padding:16px;margin-bottom:14px">
+      <div style="font-weight:800;color:${TEAL};margin-bottom:8px">👋 Texto de Boas-Vindas</div>
+      <div class="mono">Bem-vindo(a) ao Grupo VIP Role Explore Experience! 🌿🏜️
+
+Aqui você recebe em primeira mão:
+✅ Datas e vagas de bate-voltas e pacotes
+✅ Promoções exclusivas para membros VIP
+✅ Roteiros prontos + dicas reais de viajantes
+✅ Indicações de restaurantes com cupom ROLE SLZ
+✅ Alertas de "saída confirmada" e fila de espera
+
+📌 REGRAS:
+1. Apenas admins postam. Dúvidas no privado.
+2. Sem spam, vendas ou links de terceiros.
+3. Para reservar: responda a mensagem da saída ou chame no privado.
+4. Respeito sempre! 🙏
+
+Para reservar: responda com a DATA que quer ir.
+Equipe Role Explore Experience 🌿</div>
+    </div>
+    <table style="font-size:11px"><tr><th>Regra operacional</th><th>Detalhe</th></tr>
+    <tr><td>Frequência de posts</td><td>2–4 mensagens por semana. Nunca diário.</td></tr>
+    <tr><td>Horário de postagem</td><td>Entre 9h e 20h. Nunca após 21h.</td></tr>
+    <tr><td>Moderação</td><td>Somente admins postam. Membros em modo visualização.</td></tr>
+    <tr><td>Link fixo no topo</td><td>WhatsApp de atendimento sempre no topo do grupo.</td></tr>
+    <tr><td>Saída por spam</td><td>Membro que postar propaganda é removido sem aviso.</td></tr>
+    <tr><td>Cupom concierge</td><td>Indicações de parceiros com cupom ROLE SLZ enviadas mensalmente.</td></tr></table>`
+  },
+];
+
+let cur=0;
+const total=slides.length;
+
+function render(){
+  const s=slides[cur];
+  document.getElementById('slide-counter').textContent=`Slide ${cur+1} de ${total}`;
+  document.getElementById('slide-tag').textContent=s.tag;
+  document.getElementById('slide-title').textContent=s.title;
+  document.getElementById('slide-body').innerHTML=s.html;
+  document.getElementById('prev-btn').disabled=cur===0;
+  document.getElementById('next-btn').disabled=cur===total-1;
+  // dots
+  const dc=document.getElementById('dots');
+  dc.innerHTML='';
+  slides.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='dot';
+    d.style.width=i===cur?'20px':'8px';
+    d.style.background=i===cur?(cur<18?RED:TEAL):'rgba(255,255,255,.3)';
+    d.onclick=()=>go(i-cur);
+    dc.appendChild(d);
+  });
+  // index
+  const ic=document.getElementById('index');
+  ic.innerHTML='';
+  slides.forEach((sl,i)=>{
+    const b=document.createElement('button');
+    b.className='idx-btn'+(i===cur?' active':'');
+    if(i===cur) b.style.background=cur<18?RED:TEAL, b.style.borderColor=cur<18?RED:TEAL;
+    b.textContent=`${i+1}. ${sl.tag}`;
+    b.onclick=()=>{cur=i;render();};
+    ic.appendChild(b);
+  });
+}
+
+function go(d){
+  cur=Math.max(0,Math.min(total-1,cur+d));
+  render();
+}
+
+// Teclado
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(-1);
+});
+
+render();
+</script>
+</body>
+</html>
