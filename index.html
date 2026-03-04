@@ -126,24 +126,75 @@ const RED='#C0392B',TEAL='#0e8c8c',GOLD='#c9902a';
 const slides=[
   // 1 CAPA
   {tag:'APRESENTAÇÃO EXECUTIVA',title:'Role Explore Experience',html:`
-    <div style="text-align:center;padding:10px 0">
-      <div class="capa-logo"><span>🌿 Role Explore Experience</span></div>
-      <div class="capa-brands">
-        <div class="capa-brand role"><div class="brand-name">📱 Role SLZ</div><div class="brand-sub">+300k seguidores</div></div>
-        <div style="font-size:22px;color:#aaa;align-self:center">×</div>
-        <div class="capa-brand explore"><div class="brand-name">🏜️ Explore Atins</div><div class="brand-sub">Operadora Lençóis</div></div>
+    <div style="text-align:center;padding:4px 0 10px">
+
+      <!-- Tagline -->
+      <div style="font-size:12px;letter-spacing:3px;color:#999;font-weight:600;margin-bottom:18px;text-transform:uppercase">Parceria Estratégica · Maranhão</div>
+
+      <!-- Brands -->
+      <div class="capa-brands" style="margin-bottom:20px">
+        <div class="capa-brand role" style="padding:16px 28px">
+          <div style="font-size:28px;margin-bottom:6px">📱</div>
+          <div class="brand-name" style="font-size:17px">Role SLZ</div>
+          <div class="brand-sub" style="margin-top:4px;font-size:12px">+300k seguidores</div>
+          <div style="font-size:11px;color:#888;margin-top:4px">Conteúdo · Tráfego · Concierge</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px">
+          <div style="font-size:28px">×</div>
+          <div style="font-size:10px;color:#bbb;font-weight:700;letter-spacing:2px">COLLAB</div>
+        </div>
+        <div class="capa-brand explore" style="padding:16px 28px">
+          <div style="font-size:28px;margin-bottom:6px">🏜️</div>
+          <div class="brand-name" style="font-size:17px">Explore Atins</div>
+          <div class="brand-sub" style="margin-top:4px;font-size:12px">Operadora Lençóis</div>
+          <div style="font-size:11px;color:#888;margin-top:4px">Passeios · Pacotes · Bate-voltas</div>
+        </div>
       </div>
-      <div class="pills-wrap">
+
+      <!-- Destinos -->
+      <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:20px">
+        ${['🏙️ São Luís','🎣 Raposa','🏜️ Barreirinhas','🌊 Atins','🌅 Santo Amaro'].map(d=>`
+          <div style="background:#fff;border:1.5px solid #ddd;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:#444">${d}</div>
+        `).join('')}
+      </div>
+
+      <!-- Pills -->
+      <div class="pills-wrap" style="margin-bottom:20px">
         <span class="pill" style="border-color:${RED};color:${RED}">Conteúdo Collab</span>
-        <span class="pill" style="border-color:${TEAL};color:${TEAL}">Tráfego Pago 50/50</span>
         <span class="pill" style="border-color:${RED};color:${RED}">Comissão por Passeio</span>
         <span class="pill" style="border-color:${TEAL};color:${TEAL}">Concierge + Cupom</span>
         <span class="pill" style="border-color:${GOLD};color:${GOLD}">São João + Lençóis</span>
+        <span class="pill" style="border-color:${TEAL};color:${TEAL}">Bate-Volta</span>
+        <span class="pill" style="border-color:${GOLD};color:${GOLD}">Pacotes 3D / 4D</span>
       </div>
-      <div class="info-box grad" style="display:inline-block;text-align:left;max-width:460px;">
-        <div style="font-weight:800;font-size:13px;margin-bottom:6px;background:linear-gradient(135deg,${RED},${TEAL});-webkit-background-clip:text;-webkit-text-fill-color:transparent">🌿 Proposta de Valor</div>
-        <div style="font-size:14px;color:#1a1a1a">"Maranhão completo: São Luís, Raposa, Barreirinhas, Atins e Santo Amaro — do conteúdo ao fechamento, sem perrengue."</div>
+
+      <!-- Proposta de valor -->
+      <div style="background:linear-gradient(135deg,rgba(192,57,43,.07) 0%,rgba(201,144,42,.05) 50%,rgba(14,140,140,.07) 100%);border:1.5px solid #ddd;border-radius:14px;padding:18px 24px;display:inline-block;text-align:left;max-width:520px">
+        <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:#999;margin-bottom:8px;text-transform:uppercase">Proposta de Valor</div>
+        <div style="font-size:15px;color:#1a1a1a;font-weight:600;line-height:1.6">"Maranhão completo: São Luís, Raposa, Barreirinhas, Atins e Santo Amaro — do conteúdo ao fechamento, sem perrengue."</div>
+        <div style="margin-top:14px;display:flex;gap:20px;flex-wrap:wrap;justify-content:center">
+          <div style="text-align:center">
+            <div style="font-size:20px;font-weight:900;color:${RED}">+300k</div>
+            <div style="font-size:10px;color:#888">seguidores</div>
+          </div>
+          <div style="width:1px;background:#ddd"></div>
+          <div style="text-align:center">
+            <div style="font-size:20px;font-weight:900;color:${TEAL}">3</div>
+            <div style="font-size:10px;color:#888">destinos Lençóis</div>
+          </div>
+          <div style="width:1px;background:#ddd"></div>
+          <div style="text-align:center">
+            <div style="font-size:20px;font-weight:900;color:${GOLD}">R$3–5</div>
+            <div style="font-size:10px;color:#888">custo/conversa</div>
+          </div>
+          <div style="width:1px;background:#ddd"></div>
+          <div style="text-align:center">
+            <div style="font-size:20px;font-weight:900;color:${RED}">5%</div>
+            <div style="font-size:10px;color:#888">tx. fechamento</div>
+          </div>
+        </div>
       </div>
+
     </div>`
   },
   // 2 QUEM SOMOS
